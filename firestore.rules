@@ -1,0 +1,17 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Chaque utilisateur ne peut lire/écrire que son propre profil
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Tout le reste est fermé par défaut tant que les futurs modules
+    // (rendez-vous, articles, assistants) n'ont pas leurs propres règles
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
