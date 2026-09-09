@@ -30,7 +30,6 @@ yarn-error.log*
 # Firebase
 .firebase/
 .firebaserc
-firebase.json
 firebase-debug.log
 firestore-debug.log
 
