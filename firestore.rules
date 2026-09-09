@@ -3,13 +3,41 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Chaque utilisateur ne peut lire/écrire que son propre profil
+    // Chaque utilisateur ne peut lire/écrire que son propre profil.
+    // Le rôle admin est un custom claim (non modifiable ici).
     match /users/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
 
-    // Tout le reste est fermé par défaut tant que les futurs modules
-    // (rendez-vous, articles, assistants) n'ont pas leurs propres règles
+    // Assistants + leurs documents : lecture pour tout utilisateur connecté,
+    // écriture uniquement via les Cloud Functions (Admin SDK).
+    match /assistants/{assistantId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+
+      match /documents/{docId} {
+        allow read: if request.auth != null;
+        allow write: if false;
+      }
+    }
+
+    // Conversations : privées à leur propriétaire.
+    match /conversations/{conversationId} {
+      allow read, update, delete: if request.auth != null
+        && resource.data.userId == request.auth.uid;
+      allow create: if request.auth != null
+        && request.resource.data.userId == request.auth.uid;
+
+      // Les messages sont écrits uniquement par la fonction `chat`.
+      match /messages/{messageId} {
+        allow read: if request.auth != null
+          && get(/databases/$(database)/documents/conversations/$(conversationId))
+               .data.userId == request.auth.uid;
+        allow write: if false;
+      }
+    }
+
+    // Tout le reste est fermé par défaut.
     match /{document=**} {
       allow read, write: if false;
     }

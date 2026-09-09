@@ -1,52 +1,94 @@
 "use client";
 
 import type { User } from "firebase/auth";
-import { LayoutGrid, Calendar, Newspaper, Bot, LogOut } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import {
+  LayoutGrid,
+  Calendar,
+  Newspaper,
+  Bot,
+  ShieldCheck,
+  LogOut,
+} from "lucide-react";
 import { signOut } from "@/lib/firebase";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/contexts/AuthContext";
 
-const modules = [
-  { label: "Vue d'ensemble", icon: LayoutGrid, active: true },
-  { label: "Rendez-vous", icon: Calendar, active: false },
-  { label: "Articles", icon: Newspaper, active: false },
-  { label: "Assistants", icon: Bot, active: false },
+type NavItem = {
+  label: string;
+  icon: typeof LayoutGrid;
+  href?: string;
+  soon?: boolean;
+  adminOnly?: boolean;
+};
+
+const items: NavItem[] = [
+  { label: "Vue d'ensemble", icon: LayoutGrid, href: "/dashboard" },
+  { label: "Assistants", icon: Bot, href: "/dashboard/assistants" },
+  { label: "Rendez-vous", icon: Calendar, soon: true },
+  { label: "Articles", icon: Newspaper, soon: true },
+  { label: "Admin", icon: ShieldCheck, href: "/dashboard/admin", adminOnly: true },
 ];
 
 export default function Sidebar({ user }: { user: User }) {
   const router = useRouter();
+  const pathname = usePathname();
+  const { isAdmin } = useAuth();
 
   async function handleSignOut() {
     await signOut();
     router.push("/login");
   }
 
+  function isActive(href?: string) {
+    if (!href) return false;
+    if (href === "/dashboard") return pathname === "/dashboard";
+    return pathname.startsWith(href);
+  }
+
   return (
     <aside className="flex w-64 shrink-0 flex-col justify-between border-r border-line bg-surface px-6 py-8">
       <div>
-        <span className="font-display text-xl font-medium text-ink">
-          Atelier
-        </span>
+        <span className="font-display text-xl font-medium text-ink">Atelier</span>
 
         <nav className="mt-10 flex flex-col gap-1">
-          {modules.map(({ label, icon: Icon, active }) => (
-            <div
-              key={label}
-              className={`flex items-center gap-3 rounded-md px-3 py-2 font-sans text-sm ${
+          {items
+            .filter((item) => !item.adminOnly || isAdmin)
+            .map(({ label, icon: Icon, href, soon }) => {
+              const active = isActive(href);
+              const content = (
+                <>
+                  <Icon size={17} strokeWidth={1.75} />
+                  {label}
+                  {soon && (
+                    <span className="ml-auto rounded-sm bg-paper px-1.5 py-0.5 font-sans text-[10px] text-muted">
+                      bientôt
+                    </span>
+                  )}
+                </>
+              );
+              const cls = `flex items-center gap-3 rounded-md px-3 py-2 font-sans text-sm ${
                 active
                   ? "bg-teal-light font-medium text-teal-dark"
-                  : "text-muted"
-              }`}
-              aria-current={active ? "page" : undefined}
-            >
-              <Icon size={17} strokeWidth={1.75} />
-              {label}
-              {!active && (
-                <span className="ml-auto rounded-sm bg-paper px-1.5 py-0.5 font-sans text-[10px] text-muted">
-                  bientôt
-                </span>
-              )}
-            </div>
-          ))}
+                  : "text-muted hover:text-ink"
+              }`;
+
+              return soon || !href ? (
+                <div key={label} className={cls}>
+                  {content}
+                </div>
+              ) : (
+                <Link
+                  key={label}
+                  href={href}
+                  className={cls}
+                  aria-current={active ? "page" : undefined}
+                >
+                  {content}
+                </Link>
+              );
+            })}
         </nav>
       </div>
 
@@ -68,9 +110,7 @@ export default function Sidebar({ user }: { user: User }) {
           <p className="truncate font-sans text-sm font-medium text-ink">
             {user.displayName ?? "Utilisateur"}
           </p>
-          <p className="truncate font-sans text-xs text-muted">
-            {user.email}
-          </p>
+          <p className="truncate font-sans text-xs text-muted">{user.email}</p>
         </div>
         <button
           onClick={handleSignOut}

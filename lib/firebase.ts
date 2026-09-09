@@ -6,6 +6,8 @@ import {
   signOut as firebaseSignOut,
 } from "firebase/auth";
 import { getFirestore, doc, setDoc, serverTimestamp } from "firebase/firestore";
+import { getFunctions } from "firebase/functions";
+import { getStorage } from "firebase/storage";
 
 // Toutes les valeurs viennent de variables d'environnement NEXT_PUBLIC_*
 // -> voir .env.local.example. Ne jamais committer les vraies valeurs.
@@ -18,11 +20,19 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
+// Région où sont déployées les Cloud Functions (cf. functions/src/config.ts).
+export const FUNCTIONS_REGION =
+  process.env.NEXT_PUBLIC_FUNCTIONS_REGION || "europe-west1";
+
 // Evite la double initialisation en dev (hot reload) / sur le rendu serveur
-export const firebaseApp = getApps().length ? getApp() : initializeApp(firebaseConfig);
+export const firebaseApp = getApps().length
+  ? getApp()
+  : initializeApp(firebaseConfig);
 
 export const auth = getAuth(firebaseApp);
 export const db = getFirestore(firebaseApp);
+export const functions = getFunctions(firebaseApp, FUNCTIONS_REGION);
+export const storage = getStorage(firebaseApp);
 
 const googleProvider = new GoogleAuthProvider();
 

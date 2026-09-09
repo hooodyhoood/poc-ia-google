@@ -1,9 +1,17 @@
 "use client";
 
+import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
-import { Calendar, Newspaper, Bot } from "lucide-react";
+import { Calendar, Newspaper, Bot, ArrowRight } from "lucide-react";
 
-const upcoming = [
+const modules = [
+  {
+    title: "Assistants",
+    description:
+      "Un assistant par domaine, chacun ancré sur sa propre base de connaissance (Vertex AI Search).",
+    icon: Bot,
+    href: "/dashboard/assistants",
+  },
   {
     title: "Rendez-vous",
     description:
@@ -15,12 +23,6 @@ const upcoming = [
     description:
       "Partage de contenus qui viennent nourrir automatiquement les bases de connaissance.",
     icon: Newspaper,
-  },
-  {
-    title: "Assistants",
-    description:
-      "Un assistant par domaine, chacun ancré sur sa propre base de connaissance (Vertex AI Search).",
-    icon: Bot,
   },
 ];
 
@@ -36,26 +38,43 @@ export default function DashboardPage() {
           Bonjour{firstName ? `, ${firstName}` : ""}.
         </h1>
         <p className="mt-2 max-w-lg font-sans text-sm leading-relaxed text-muted">
-          Les fondations (compte et connexion) sont en place. Les modules
-          ci-dessous arrivent dans les prochaines itérations du POC.
+          Le module Assistants est actif. Les modules Rendez-vous et Articles
+          arrivent dans les prochaines itérations du POC.
         </p>
       </header>
 
       <section className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-3">
-        {upcoming.map(({ title, description, icon: Icon }) => (
-          <div
-            key={title}
-            className="rounded-lg border border-line bg-surface p-6"
-          >
-            <Icon size={20} strokeWidth={1.75} className="text-teal" />
-            <h2 className="mt-4 font-sans text-sm font-semibold text-ink">
-              {title}
-            </h2>
-            <p className="mt-2 font-sans text-[13px] leading-relaxed text-muted">
-              {description}
-            </p>
-          </div>
-        ))}
+        {modules.map(({ title, description, icon: Icon, href }) => {
+          const inner = (
+            <>
+              <Icon size={20} strokeWidth={1.75} className="text-teal" />
+              <h2 className="mt-4 flex items-center gap-1.5 font-sans text-sm font-semibold text-ink">
+                {title}
+                {href && <ArrowRight size={14} className="text-teal" />}
+              </h2>
+              <p className="mt-2 font-sans text-[13px] leading-relaxed text-muted">
+                {description}
+              </p>
+              {!href && (
+                <span className="mt-3 inline-block rounded-sm bg-paper px-1.5 py-0.5 font-sans text-[10px] text-muted">
+                  bientôt
+                </span>
+              )}
+            </>
+          );
+          const cls =
+            "rounded-lg border border-line bg-surface p-6 transition" +
+            (href ? " hover:border-teal" : "");
+          return href ? (
+            <Link key={title} href={href} className={cls}>
+              {inner}
+            </Link>
+          ) : (
+            <div key={title} className={cls}>
+              {inner}
+            </div>
+          );
+        })}
       </section>
     </div>
   );
