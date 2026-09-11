@@ -77,7 +77,7 @@ Le rôle admin est un *custom claim*. Après une première connexion à l'app :
 ```bash
 # Générer une clé : Console Firebase > Paramètres > Comptes de service > Générer une clé privée
 # La placer en service-account.json à la racine (gitignoré), puis :
-cd functions && node ../scripts/set-admin.mjs ton.email@example.com
+cd functions && node scripts/set-admin.mjs ton.email@example.com
 ```
 
 Se déconnecter/reconnecter dans l'app pour rafraîchir le jeton → la section
@@ -137,7 +137,7 @@ functions/
   src/flows/chat.ts          flow de chat (RAG + streaming)
   src/lib/discoveryengine.ts data stores & import de documents (Vertex AI Search)
   src/index.ts               chat / createAssistant / deleteAssistant / ingestDocument
-scripts/set-admin.mjs        attribue le custom claim `admin`
+  scripts/set-admin.mjs      attribue le custom claim `admin`
 firestore.rules, storage.rules
 ```
 

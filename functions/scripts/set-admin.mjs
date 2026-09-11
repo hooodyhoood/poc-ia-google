@@ -2,7 +2,7 @@
  * Donne (ou retire) le rôle admin à un utilisateur via un custom claim.
  *
  * Usage (depuis la racine du repo) :
- *   cd functions && node ../scripts/set-admin.mjs <email> [--remove]
+ *   cd functions && node scripts/set-admin.mjs <email> [--remove]
  *
  * Identifiants : soit GOOGLE_APPLICATION_CREDENTIALS pointe vers une clé de
  * compte de service, soit un fichier ./service-account.json est présent à la
@@ -18,7 +18,7 @@ const email = process.argv[2];
 const remove = process.argv.includes("--remove");
 
 if (!email) {
-  console.error("Usage: node ../scripts/set-admin.mjs <email> [--remove]");
+  console.error("Usage: node scripts/set-admin.mjs <email> [--remove]");
   process.exit(1);
 }
 
